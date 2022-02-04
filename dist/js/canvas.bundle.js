@@ -177,6 +177,19 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/images/spriteStandRight.png":
+/*!*****************************************!*\
+  !*** ./src/images/spriteStandRight.png ***!
+  \*****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = (__webpack_require__.p + "01e8f15e899155c68950c40e0a6b8df0.png");
+
+/***/ }),
+
 /***/ "./src/js/canvas.js":
 /*!**************************!*\
   !*** ./src/js/canvas.js ***!
@@ -190,9 +203,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _images_hills_png__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../images/hills.png */ "./src/images/hills.png");
 /* harmony import */ var _images_background_png__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../images/background.png */ "./src/images/background.png");
 /* harmony import */ var _images_platformSmallTall_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../images/platformSmallTall.png */ "./src/images/platformSmallTall.png");
-/* harmony import */ var _images_spriteRunLeft_png__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../images/spriteRunLeft.png */ "./src/images/spriteRunLeft.png");
-/* harmony import */ var _images_spriteRunRight_png__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../images/spriteRunRight.png */ "./src/images/spriteRunRight.png");
-/* harmony import */ var _images_spriteStandLeft_png__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../images/spriteStandLeft.png */ "./src/images/spriteStandLeft.png");
+/* harmony import */ var _images_spriteStandRight_png__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../images/spriteStandRight.png */ "./src/images/spriteStandRight.png");
+/* harmony import */ var _images_spriteStandLeft_png__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../images/spriteStandLeft.png */ "./src/images/spriteStandLeft.png");
+/* harmony import */ var _images_spriteRunRight_png__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../images/spriteRunRight.png */ "./src/images/spriteRunRight.png");
+/* harmony import */ var _images_spriteRunLeft_png__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../images/spriteRunLeft.png */ "./src/images/spriteRunLeft.png");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -228,26 +242,43 @@ var Player = /*#__PURE__*/function () {
     };
     this.width = 66;
     this.height = 150;
-    this.image = createImage(_images_spriteRunRight_png__WEBPACK_IMPORTED_MODULE_5__["default"]);
+    this.image = createImage(_images_spriteStandRight_png__WEBPACK_IMPORTED_MODULE_4__["default"]);
+    this.frames = 0;
+    this.sprites = {
+      stand: {
+        right: createImage(_images_spriteStandRight_png__WEBPACK_IMPORTED_MODULE_4__["default"]),
+        left: createImage(_images_spriteStandLeft_png__WEBPACK_IMPORTED_MODULE_5__["default"]),
+        cropWidth: 177,
+        width: 66
+      },
+      run: {
+        right: createImage(_images_spriteRunRight_png__WEBPACK_IMPORTED_MODULE_6__["default"]),
+        left: createImage(_images_spriteRunLeft_png__WEBPACK_IMPORTED_MODULE_7__["default"]),
+        cropWidth: 341,
+        width: 127.875
+      }
+    };
+    this.currentSprite = this.sprites.stand.right;
+    this.currentCropWidth = 177;
   }
 
   _createClass(Player, [{
     key: "draw",
     value: function draw() {
-      // c.fillStyle = "indianred";
-      // c.fillRect(this.position.x, this.position.y, this.width, this.height);
-      c.drawImage(this.image, 0, 0, 177, 400, this.position.x, this.position.y, this.width, this.height);
+      c.drawImage(this.currentSprite, this.currentCropWidth * this.frames, 0, this.currentCropWidth, 400, this.position.x, this.position.y, this.width, this.height);
     }
   }, {
     key: "update",
     value: function update() {
+      // CHARACTER MOVE FORWARD AND BACKWARD
+      this.frames++;
+      if (this.frames > 59 && (this.currentSprite === this.sprites.stand.right || this.currentSprite === this.sprites.stand.left)) this.frames = 0;else if (this.frames > 29 && (this.currentSprite === this.sprites.run.right || this.currentSprite === this.sprites.run.left)) this.frames = 0;
       this.draw();
       this.position.x += this.velocity.x;
       this.position.y += this.velocity.y;
 
       if (this.position.y + this.height + this.velocity.y <= canvas.height) {
-        this.velocity.y += gravity; // } else {
-        //   this.velocity.y = 0;
+        this.velocity.y += gravity;
       }
     }
   }]);
@@ -319,25 +350,9 @@ function createImage(imageSrc) {
 var platformImage = createImage(_images_platform_png__WEBPACK_IMPORTED_MODULE_0__["default"]);
 var platformSmallTallImage = createImage(_images_platformSmallTall_png__WEBPACK_IMPORTED_MODULE_3__["default"]);
 var player = new Player();
-var platforms = [// new Platform({ x: -1, y: 450, image: platformImage }),
-  // new Platform({ x: platformImage.width - 3, y: 450, image: platformImage }),
-  // new Platform({
-  //   x: platformImage.width * 2 + 100,
-  //   y: 450,
-  //   image: platformImage,
-  // }),
-];
-var genericObjects = [// new GenericObjects({
-  //   x: -1,
-  //   y: -1,
-  //   image: createImage(background),
-  // }),
-  // new GenericObjects({
-  //   x: 0,
-  //   y: 0,
-  //   image: createImage(hills),
-  // }),
-];
+var platforms = [];
+var genericObjects = [];
+var lastKey;
 var keys = {
   right: {
     pressed: false
@@ -436,7 +451,28 @@ function animate() {
     if (player.position.y + player.height <= platform.position.y && player.position.y + player.height + player.velocity.y >= platform.position.y && player.position.x + player.width >= platform.position.x && player.position.x <= platform.position.x + platform.width) {
       player.velocity.y = 0;
     }
-  }); // WIN CONDITION
+  }); // SPRITE SWITCHING
+
+  if (keys.right.pressed && lastKey === "right" && player.currentSprite !== player.sprites.run.right) {
+    player.frames = 1;
+    player.currentSprite = player.sprites.run.right;
+    player.currentCropWidth = player.sprites.run.cropWidth;
+    player.width = player.sprites.run.width;
+  } else if (!keys.right.pressed && lastKey === "right" && player.currentSprite !== player.sprites.stand.right) {
+    player.frames = 1;
+    player.currentSprite = player.sprites.stand.right;
+    player.currentCropWidth = player.sprites.stand.cropWidth;
+    player.width = player.sprites.run.width;
+  } else if (keys.left.pressed && lastKey === "left" && player.currentSprite !== player.sprites.run.left) {
+    player.currentSprite = player.sprites.run.left;
+    player.currentCropWidth = player.sprites.run.cropWidth;
+    player.width = player.sprites.run.width;
+  } else if (!keys.left.pressed && lastKey === "left" && player.currentSprite !== player.sprites.stand.left) {
+    player.currentSprite = player.sprites.stand.left;
+    player.currentCropWidth = player.sprites.stand.cropWidth;
+    player.width = player.sprites.run.width;
+  } // WIN CONDITION
+
 
   if (scrollOffset > platformImage.width * 5 + 300 - 2) {
     console.log("win win");
@@ -466,7 +502,11 @@ window.addEventListener("keydown", function (_ref3) {
 
     case 68:
       console.log("right");
-      keys.right.pressed = true;
+      keys.right.pressed = true; // player.currentSprite = player.sprites.run.right;
+      // player.currentCropWidth = player.sprites.run.cropWidth;
+      // player.width = player.sprites.run.width;
+
+      lastKey = "right";
       break;
 
     case 87:
@@ -484,6 +524,7 @@ window.addEventListener("keyup", function (_ref4) {
     case 65:
       console.log("left");
       keys.left.pressed = false;
+      lastKey = "left";
       break;
 
     case 83:
@@ -496,8 +537,7 @@ window.addEventListener("keyup", function (_ref4) {
       break;
 
     case 87:
-      console.log("up"); // player.velocity.y -= 20;
-
+      console.log("up");
       break;
   }
 });

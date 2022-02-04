@@ -3,10 +3,10 @@ import hills from "../images/hills.png";
 import background from "../images/background.png";
 import platformSmallTall from "../images/platformSmallTall.png";
 
-import spriteRunLeft from "../images/spriteRunLeft.png";
-import spriteRunRight from "../images/spriteRunRight.png";
-import spriteStandLeft from "../images/spriteStandLeft.png";
-import spriteStandRight from "../images/spriteRunRight.png";
+import standRight from "../images/spriteStandRight.png";
+import standLeft from "../images/spriteStandLeft.png";
+import runRight from "../images/spriteRunRight.png";
+import runLeft from "../images/spriteRunLeft.png";
 
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
@@ -28,17 +28,34 @@ class Player {
     };
     this.width = 66;
     this.height = 150;
-    this.image = createImage(spriteStandRight);
+    this.image = createImage(standRight);
+    this.frames = 0;
+    this.sprites = {
+      stand: {
+        right: createImage(standRight),
+        left: createImage(standLeft),
+        cropWidth: 177,
+        width: 66,
+      },
+      run: {
+        right: createImage(runRight),
+        left: createImage(runLeft),
+
+        cropWidth: 341,
+        width: 127.875,
+      },
+    };
+
+    this.currentSprite = this.sprites.stand.right;
+    this.currentCropWidth = 177;
   }
 
   draw() {
-    // c.fillStyle = "indianred";
-    // c.fillRect(this.position.x, this.position.y, this.width, this.height);
     c.drawImage(
-      
-      this.image,0,
+      this.currentSprite,
+      this.currentCropWidth * this.frames,
       0,
-      177,
+      this.currentCropWidth,
       400,
       this.position.x,
       this.position.y,
@@ -47,13 +64,26 @@ class Player {
     );
   }
   update() {
+    // CHARACTER MOVE FORWARD AND BACKWARD
+    this.frames++;
+    if (
+      this.frames > 59 &&
+      (this.currentSprite === this.sprites.stand.right ||
+        this.currentSprite === this.sprites.stand.left)
+    )
+      this.frames = 0;
+    else if (
+      this.frames > 29 &&
+      (this.currentSprite === this.sprites.run.right ||
+        this.currentSprite === this.sprites.run.left)
+    )
+      this.frames = 0;
+
     this.draw();
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
     if (this.position.y + this.height + this.velocity.y <= canvas.height) {
       this.velocity.y += gravity;
-      // } else {
-      //   this.velocity.y = 0;
     }
   }
 }
@@ -99,28 +129,10 @@ function createImage(imageSrc) {
 let platformImage = createImage(platform);
 let platformSmallTallImage = createImage(platformSmallTall);
 let player = new Player();
-let platforms = [
-  // new Platform({ x: -1, y: 450, image: platformImage }),
-  // new Platform({ x: platformImage.width - 3, y: 450, image: platformImage }),
-  // new Platform({
-  //   x: platformImage.width * 2 + 100,
-  //   y: 450,
-  //   image: platformImage,
-  // }),
-];
-let genericObjects = [
-  // new GenericObjects({
-  //   x: -1,
-  //   y: -1,
-  //   image: createImage(background),
-  // }),
-  // new GenericObjects({
-  //   x: 0,
-  //   y: 0,
-  //   image: createImage(hills),
-  // }),
-];
+let platforms = [];
+let genericObjects = [];
 
+let lastKey;
 let keys = {
   right: {
     pressed: false,
@@ -239,6 +251,44 @@ function animate() {
       player.velocity.y = 0;
     }
   });
+  // SPRITE SWITCHING
+  if (
+    keys.right.pressed &&
+    lastKey === "right" &&
+    player.currentSprite !== player.sprites.run.right
+  ) {
+    player.frames = 1;
+
+    player.currentSprite = player.sprites.run.right;
+    player.currentCropWidth = player.sprites.run.cropWidth;
+    player.width = player.sprites.run.width;
+  } else if (
+    !keys.right.pressed &&
+    lastKey === "right" &&
+    player.currentSprite !== player.sprites.stand.right
+  ) {
+    player.frames = 1;
+
+    player.currentSprite = player.sprites.stand.right;
+    player.currentCropWidth = player.sprites.stand.cropWidth;
+    player.width = player.sprites.run.width;
+  } else if (
+    keys.left.pressed &&
+    lastKey === "left" &&
+    player.currentSprite !== player.sprites.run.left
+  ) {
+    player.currentSprite = player.sprites.run.left;
+    player.currentCropWidth = player.sprites.run.cropWidth;
+    player.width = player.sprites.run.width;
+  } else if (
+    !keys.left.pressed &&
+    lastKey === "left" &&
+    player.currentSprite !== player.sprites.stand.left
+  ) {
+    player.currentSprite = player.sprites.stand.left;
+    player.currentCropWidth = player.sprites.stand.cropWidth;
+    player.width = player.sprites.run.width;
+  }
   // WIN CONDITION
   if (scrollOffset > platformImage.width * 5 + 300 - 2) {
     console.log("win win");
@@ -267,6 +317,10 @@ window.addEventListener("keydown", ({ keyCode }) => {
     case 68:
       console.log("right");
       keys.right.pressed = true;
+      // player.currentSprite = player.sprites.run.right;
+      // player.currentCropWidth = player.sprites.run.cropWidth;
+      // player.width = player.sprites.run.width;
+      lastKey = "right";
 
       break;
 
@@ -283,6 +337,7 @@ window.addEventListener("keyup", ({ keyCode }) => {
     case 65:
       console.log("left");
       keys.left.pressed = false;
+      lastKey = "left";
 
       break;
 
@@ -293,11 +348,11 @@ window.addEventListener("keyup", ({ keyCode }) => {
     case 68:
       console.log("right");
       keys.right.pressed = false;
+
       break;
 
     case 87:
       console.log("up");
-      // player.velocity.y -= 20;
       break;
   }
 });
